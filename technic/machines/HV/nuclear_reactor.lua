@@ -120,25 +120,27 @@ end
 The standard reactor structure consists of a 9x9x9 cube.  A cross
 section through the middle:
 
-	CCCC CCCC
-	CBBB BBBC
-	CBLL LLBC
-	CBLWWWLBC
+	CCCC*CCCC
+	CBBB*BBBC
+	CBLL*LLBC
+	CBLW*WLBC
 	CBLW#WLBC
 	CBLW|WLBC
 	CBLL|LLBC
 	CBBB|BBBC
 	CCCC|CCCC
 	C = Concrete, B = Blast-resistant concrete, L = Lead,
-	W = water node, # = reactor core, | = HV cable
+	W = water node, # = reactor core, | = HV cable,
+	* = man-hole or pneumatic tubes
 
-The man-hole is optional (but necessary for refueling).
+The man-hole is optional (but necessary for refueling); pneumatic tubes
+can occupy that space.
 
 For the reactor to operate and not melt down, it insists on the inner
 7x7x7 portion (from the core out to the blast-resistant concrete)
 being intact.  Intactness only depends on the number of nodes of the
 right type in each layer.  The water layer must have water in all but
-at most one node; the steel and blast-resistant concrete layers must
+at most two node; the steel and blast-resistant concrete layers must
 have the right material in all but at most two nodes.  The permitted
 gaps are meant for the cable and man-hole, but can actually be anywhere
 and contain anything.  For the reactor to be useful, a cable must
@@ -219,10 +221,10 @@ local function reactor_structure_badness(pos)
 		lead_layer = steel_layer
 	end
 
-	if water_layer > 25 then water_layer = 25 end
+	if water_layer > 24 then water_layer = 24 end
 	if lead_layer > 96 then lead_layer = 96 end
 	if blast_layer > 216 then blast_layer = 216 end
-	return (25 - water_layer) + (96 - lead_layer) + (216 - blast_layer)
+	return (24 - water_layer) + (96 - lead_layer) + (216 - blast_layer)
 end
 
 local mcl_expl_info = {
@@ -474,6 +476,9 @@ minetest.register_node("technic:hv_nuclear_reactor_core", {
 			action = digiline_def,
 		},
 	},
+
+	-- pipeworks interaction
+	tube = technic.new_default_tube(),
 
 	can_dig = technic.machine_can_dig,
 	on_destruct = function(pos) siren_set_state(pos, SS_OFF) end,
